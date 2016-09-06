@@ -39,13 +39,14 @@ func scanRequest(rows *sql.Rows) Request {
 	return request
 }
 //TODO:预计加上返回查询结果的数组
-func GetAllRequest(db *sql.DB) {
-
+func GetAllRequest(db *sql.DB) []Request {
+	var requestList []Request
 	rows, err := db.Query("SELECT * FROM Request")
 	checkErr(err)
 	for rows.Next() {
-		scanRequest(rows)
+		requestList = append(requestList, scanRequest(rows))
 	}
+	return requestList
 }
 func escapeMysqlQuery(path string) string {
 	str := strings.Replace(path, "/", "\"/", 1)
