@@ -38,7 +38,6 @@ func scanRequest(rows *sql.Rows) Request {
 	fmt.Println("-----------------")
 	return request
 }
-//TODO:预计加上返回查询结果的数组
 func GetAllRequest(db *sql.DB) []Request {
 	var requestList []Request
 	rows, err := db.Query("SELECT * FROM Request")
@@ -62,4 +61,25 @@ func GetRequestByPath(db *sql.DB, path string) Request {
 		request = scanRequest(rows)
 	}
 	return request
+}
+
+func CreateRequest(db *sql.DB, request Request) Request {
+	stmt, err := db.Prepare("INSERT Request SET requestPath=?,serviceId=?,method=?,cpuCost=?,memCost=?,timeCost=?,path=?")
+	checkErr(err)
+
+	res, err := stmt.Exec(request.RequestPath, request.ServiceId, request.Method, request.CpuCost, request.MemCost, request.TimeCost, escapeMysqlQuery(request.Path))
+	checkErr(err)
+	id, err := res.LastInsertId()
+	checkErr(err)
+	request.RequestId = int(id)
+	return request
+}
+
+func DeleteRequest(db *sql.DB, requestId int) {
+	stmt, err := db.Prepare("delete from Request where requestId=?")
+	checkErr(err)
+	res, err := stmt.Exec(requestId)
+	checkErr(err)
+	fmt.Println(res.RowsAffected())
+
 }
